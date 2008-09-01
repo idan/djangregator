@@ -29,7 +29,6 @@ Djangregator requires:
 
 * Python 2.5
 * Django 1.0
-* django-tagging (http://code.google.com/p/django-tagging/)
 
 Sadly, there is no unified API for accessing different sites. The following libraries are required for interfacing with the relevant site. Note that if a library is not present, djangregator will simply skip that site, even if it has been configured in the settings.
 
