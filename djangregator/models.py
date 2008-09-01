@@ -28,8 +28,6 @@ from django.db import models
 from django.db.models import signals
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-from tagging.fields import TagField
-from tagging.models import Tag
 import datetime
 
 class LifestreamItem(models.Model):
@@ -49,7 +47,6 @@ class ActivityEntry(models.Model):
     published           = models.DateTimeField(null=False, blank=False)
     title               = models.CharField(max_length=255, null=True, blank=True)
     link                = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    tags                = TagField()
     lifestream_item     = generic.GenericRelation(LifestreamItem)
     
     class Meta:
@@ -61,10 +58,7 @@ class ActivityEntry(models.Model):
         
     def __unicode__(self):
         return self.title or self.link
-    
-    def get_tags(self):
-        return Tag.objects.get_for_object(self)
-    
+
 
 def update_lifestream_entry(sender, instance, created, raw, **kwargs):
     if created:
