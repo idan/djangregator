@@ -39,21 +39,21 @@ Sadly, there is no unified API for accessing different sites. The following libr
     * ElementTree - included in python 2.5 used by FlickrAPI
   
   
-  Credits
-  =======
+Credits
+=======
 
-  Djangregator is heavily inspired by (read: blatantly ripped off from) several django luminaries' efforts. Each of these are worth reading and knowing if you are learning Django!
+Djangregator is heavily inspired by (read: blatantly ripped off from) several django luminaries' efforts. Each of these are worth reading and knowing if you are learning Django!
 
-  * Ryan Berg: the original inspiration for this project. Ryan shows how he implemented his aggregation system on his blog, which has been an endless source of wisdom and education.
-      * http://ryanberg.net
+* Ryan Berg: the original inspiration for this project. Ryan shows how he implemented his aggregation system on his blog, which has been an endless source of wisdom and education.
+    * http://ryanberg.net
 
-  * Horst Gutmann: is a talented blogger who also wrote a django application for dealing with lifestreams, appropriately titled "django-lifestream". He also has some very useful advice to impart about using generic relations in the Django ORM in his blog.
-      * http://zerokspot.com
-      * http://code.google.com/p/django-lifestream/
+* Horst Gutmann: is a talented blogger who also wrote a django application for dealing with lifestreams, appropriately titled "django-lifestream". He also has some very useful advice to impart about using generic relations in the Django ORM in his blog.
+    * http://zerokspot.com
+    * http://code.google.com/p/django-lifestream/
 
-  * Nuno Mariz: shows how to accomplish the same thing as djangregator with a lot less work by leveraging the fact that FriendFeed offers an API into its already-aggregated lifestream. The code for the cron script is largely based on his example.
-      * http://mariz.org/blog/2008/apr/04/internet-lifestream-with-django/
+* Nuno Mariz: shows how to accomplish the same thing as djangregator with a lot less work by leveraging the fact that FriendFeed offers an API into its already-aggregated lifestream. The code for the cron script is largely based on his example.
+    * http://mariz.org/blog/2008/apr/04/internet-lifestream-with-django/
 
-  * Jesse Legg: authored another project similar to djangregator, if "similar" were a synonym for "a lot more polished" and "written long before mine".
-      * http://jesselegg.com/
-      * http://code.google.com/p/django-syncr/
+* Jesse Legg: authored another project similar to djangregator, if "similar" were a synonym for "a lot more polished" and "written long before mine".
+    * http://jesselegg.com/
+    * http://code.google.com/p/django-syncr/
