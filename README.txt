@@ -13,6 +13,8 @@ Djangregator currently supports the following sources of information:
 * Flickr (photos only, no sets)
 * Delicious
 
+I wrote it because I wanted to try my hand at a problem that was a little larger than just "Write a blog". Along the way I had to learn about signals, the ORM, writing template tags, model inheritance -- all sorts of subjects that one needs to grok before diving into something larger.
+
 
 License
 =======
@@ -44,7 +46,7 @@ Sadly, there is no unified API for accessing different sites. The following libr
   Djangregator is heavily inspired by (read: blatantly ripped off from) several django luminaries' efforts. Each of these are worth reading and knowing if you are learning Django!
 
   * Ryan Berg: the original inspiration for this project. Ryan shows how he implemented his aggregation system on his blog, which has been an endless source of wisdom and education.
-      * http://ryanberg.com
+      * http://ryanberg.net
 
   * Horst Gutmann: is a talented blogger who also wrote a django application for dealing with lifestreams, appropriately titled "django-lifestream". He also has some very useful advice to impart about using generic relations in the Django ORM in his blog.
       * http://zerokspot.com
