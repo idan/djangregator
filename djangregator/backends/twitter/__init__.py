@@ -24,10 +24,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.backends.twitter.models import *
-import twitter
-from datetime import datetime
-
 def fetch(credentials):
     """
     Fetch a list of recent tweets from the twitter servers using the supplied
@@ -36,6 +32,10 @@ def fetch(credentials):
     Returns a tuple containing the number of items created, and the number of 
     items updated or skipped.
     """
+    
+    from djangregator.backends.twitter.models import *
+    import twitter
+    from datetime import datetime
     
     items_existing = 0
     items_created = 0

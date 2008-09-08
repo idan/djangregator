@@ -24,8 +24,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.models import *
+from django.db import models
 from django.db.models import signals
+from djangregator.models import *
 
 class DeliciousLink(ActivityEntry):
     description         = models.TextField(blank=True)
@@ -33,6 +34,10 @@ class DeliciousLink(ActivityEntry):
     class Meta(ActivityEntry.Meta):
         verbose_name = 'Delicious Link'
         verbose_name_plural = 'Delicious Links'
+        db_table = 'djangregator_deliciouslink'
+        
+    def __unicode__(self):
+        return u'DeliciousLink'
 
 
 signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.delicious.models')

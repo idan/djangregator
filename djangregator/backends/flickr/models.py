@@ -36,6 +36,7 @@ class FlickrPhoto(ActivityEntry):
     class Meta(ActivityEntry.Meta):
         verbose_name = 'Flickr Photo'
         verbose_name_plural = 'Flickr Photos'
+        db_table = 'djangregator_flickrphoto'
 
 
 signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.flickr.models')

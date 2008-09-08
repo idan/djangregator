@@ -33,6 +33,7 @@ class TwitterStatus(ActivityEntry):
     class Meta(ActivityEntry.Meta):
         verbose_name = 'Twitter Status'
         verbose_name_plural = 'Twitter Statuses'
+        db_table = 'djangregator_twitterstatus'
         
 
 signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.twitter.models')
