@@ -24,28 +24,4 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-def fetch(credentials):
-    """
-    Fetch a list of recent bookmarks from the delicious servers using the
-    supplied credentials, and save them to the DB.
-    
-    Returns a tuple containing the number of items created, and the number of 
-    items updated or skipped.
-    """
-    from djangregator.backends.delicious.models import *
-    import deliciousapi
-    
-    items_existing = 0
-    items_created = 0
-    delicious = deliciousapi.DeliciousAPI()
-    for bookmark in delicious.get_bookmarks(credentials['username']):
-        entry, created = DeliciousLink.objects.get_or_create(
-            link=bookmark[0],
-            title=bookmark[2],
-            description=bookmark[3],
-            published=bookmark[4])
-        if created:
-            items_created += 1
-        else:
-            items_existing += 1
-    return (items_created, items_existing)
+from fetch import fetch

@@ -24,4 +24,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from fetch import fetch
+from django.conf import settings
+import logging
+
+def fetch():
+    for service in settings.DJANGREGATOR_AUTH:
+        logging.info("Fetching entries from %s" % service)
+        modulename = "djangregator.backends.%s" % service
+        try:
+            module = __import__(modulename, globals(), locals(), ['fetch'])
+        except:
+            logging.error("Unable to locate a backend for syncing with %s. Skipping..." % service)
+            continue
+    
+        (new, existing) = module.fetch(settings.DJANGREGATOR_AUTH[service])
+        logging.info('%s: synced %s new, %s existing' % (service, new, existing))

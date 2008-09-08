@@ -24,47 +24,4 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-
-def fetch(credentials):
-    """
-    Fetch a list of recent photos from the flickr servers using the supplied
-    credentials, and save them to the DB.
-    
-    Returns a tuple containing the number of items created, and the number of 
-    items updated or skipped.
-    """   
-    
-    from djangregator.backends.flickr.models import *
-    import flickrapi
-    
-    items_existing = 0
-    items_created = 0
-    flickr = flickrapi.FlickrAPI(credentials['api_key'], format='etree')
-    recentphotos = flickr.people_getPublicPhotos(user_id=credentials['userid'], extras='date_upload, date_taken')
-    iter = recentphotos.getiterator('photo');
-    for photo in iter:
-        upload_date = datetime.fromtimestamp(int(photo.attrib['dateupload']))
-        entry, created = FlickrPhoto.objects.get_or_create(photo_id=photo.attrib['id'], published=upload_date)
-        if created:
-            entry.title = photo.attrib['title']
-            entry.link = u'http://flickr.com/photos/%s/%s' % (
-                credentials['userid'],
-                entry.photo_id
-            )
-            base_url = u'http://farm%s.static.flickr.com/%s/%s_%s' % (
-                photo.attrib['farm'],
-                photo.attrib['server'],
-                entry.photo_id,
-                photo.attrib['secret']            
-            )
-            entry.square_thumb_link = base_url + u'_s.jpg'
-            entry.image_500px_link = base_url + u'.jpg'
-            entry.taken_on_date = dateutil.parser.parse(photo.attrib['datetaken'])
-            entry.save()
-            items_created += 1
-        else:
-            items_existing += 1
-    
-    return (items_created, items_existing)
-
+from fetch import fetch
