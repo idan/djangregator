@@ -31,6 +31,10 @@ from django.contrib.contenttypes.models import ContentType
 import datetime
 
 class LifestreamItem(models.Model):
+    """
+    Generically related to one or more instances of activity from a specific
+    online service.
+    """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     published = models.DateTimeField()
@@ -44,6 +48,10 @@ class LifestreamItem(models.Model):
 
 
 class ActivityEntry(models.Model):
+    """
+    An abstract base class which backends can extend to cover service-specific
+    information.
+    """
     published           = models.DateTimeField(null=False, blank=False)
     title               = models.CharField(max_length=255, null=True, blank=True)
     link                = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
@@ -61,6 +69,10 @@ class ActivityEntry(models.Model):
 
 
 def update_lifestream_entry(sender, instance, created, raw, **kwargs):
+    """
+    Post-save handler which creates or updates LifestreamItem instances
+    whenever backend-specific model instances are saved.
+    """
     if created:
         item = LifestreamItem()
         item.content_type = ContentType.objects.get_for_model(type(instance))

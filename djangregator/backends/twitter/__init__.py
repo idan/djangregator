@@ -24,18 +24,29 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf import settings
-import logging
+from djangregator.backends.twitter.models import *
+import twitter
+from datetime import datetime
 
-def fetch():
-    for service in settings.DJANGREGATOR_AUTH:
-        logging.info("Fetching entries from %s" % service)
-        modulename = "djangregator.backends.%s" % service
-        try:
-            module = __import__(modulename, globals(), locals(), ['fetch'])
-        except:
-            logging.error("Unable to locate a backend for syncing with %s. Skipping..." % service)
-            continue
+def fetch(credentials):
+    """
+    Fetch a list of recent tweets from the twitter servers using the supplied
+    credentials, and save them to the DB.
     
-        (new, existing) = module.fetch(settings.DJANGREGATOR_AUTH[service])
-        logging.info('%s: synced %s new, %s existing' % (service, new, existing))
+    Returns a tuple containing the number of items created, and the number of 
+    items updated or skipped.
+    """
+    
+    items_existing = 0
+    items_created = 0
+    twitterapi = twitter.Api()
+    for status in twitterapi.GetUserTimeline(credentials['username']):
+        tweetdate = datetime.strptime(status.created_at, '%a %b %d %H:%M:%S +0000 %Y')
+        entry, created = TwitterStatus.objects.get_or_create(twitter_id=status.id, published=tweetdate)
+        if created:
+            entry.title = status.text
+            entry.link = u'http://twitter.com/%s/%s' % (settings.DJANGREGATOR_AUTH['twitter'], status.id)
+            entry.save()
+            items_created += 1
+        else:
+            items_existing += 1

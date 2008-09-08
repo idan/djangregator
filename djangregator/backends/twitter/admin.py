@@ -26,6 +26,9 @@
 
 from django.contrib import admin
 from djangregator.admin import ActivityEntryAdmin
-from djangregator.twitter.models import *
+from djangregator.backends.twitter.models import *
 
-admin.site.register(TwitterStatus, ActivityEntryAdmin)
+class TwitterStatusAdmin(ActivityEntryAdmin):
+    model = TwitterStatus
+
+admin.site.register(TwitterStatus, TwitterStatusAdmin)

@@ -26,6 +26,9 @@
 
 from django.contrib import admin
 from djangregator.admin import ActivityEntryAdmin
-from djangregator.delicious.models import *
+from djangregator.backends.flickr.models import *
 
-admin.site.register(DeliciousLink, ActivityEntryAdmin)
+class FlickrPhotoAdmin(ActivityEntryAdmin):
+    model = FlickrPhoto
+    
+admin.site.register(FlickrPhoto, FlickrPhotoAdmin)

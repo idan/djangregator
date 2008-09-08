@@ -27,12 +27,13 @@
 from django.contrib import admin
 from djangregator.models import *
 
-class ActivityEntryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'link', 'published']
+class ActivityEntryAdmin(admin.TabularInline):
+    list_display = ('title', 'link', 'published')
     date_hierarchy = 'published'
+    ordering = ('-published',)
 
 class LifestreamItemAdmin(admin.ModelAdmin):
-    list_display = ['published', 'content_type']
+    list_display = ('published', 'content_type')
     date_hierarchy = 'published'
 
 
