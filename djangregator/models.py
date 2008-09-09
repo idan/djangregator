@@ -73,6 +73,7 @@ def update_lifestream_entry(sender, instance, created, raw, **kwargs):
     Post-save handler which creates or updates LifestreamItem instances
     whenever backend-specific model instances are saved.
     """
+
     if created:
         item = LifestreamItem()
         item.content_type = ContentType.objects.get_for_model(type(instance))

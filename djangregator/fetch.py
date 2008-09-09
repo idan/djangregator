@@ -36,6 +36,6 @@ def fetch():
         except:
             logging.error("Unable to locate a backend for syncing with %s. Skipping..." % service)
             continue
-    
-        (new, existing) = module.fetch(settings.DJANGREGATOR_AUTH[service])
-        logging.info('%s: synced %s new, %s existing' % (service, new, existing))
+            
+        (created, existing) = module.fetch(settings.DJANGREGATOR_AUTH[service])
+        logging.info('%s: synced %s new, %s existing' % (service, created, existing))

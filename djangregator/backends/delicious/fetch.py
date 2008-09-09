@@ -37,15 +37,17 @@ def fetch(credentials):
     
     items_existing = 0
     items_created = 0
-    delicious = deliciousapi.DeliciousAPI()
-    for bookmark in delicious.get_bookmarks(credentials['username']):
+    deliciousapi = deliciousapi.DeliciousAPI()
+    for bookmark in deliciousapi.get_bookmarks(username=credentials['username']):
         entry, created = DeliciousLink.objects.get_or_create(
-            link=bookmark[0],
-            title=bookmark[2],
-            description=bookmark[3],
-            published=bookmark[4])
+            link = bookmark[0],
+            published = bookmark[4])
         if created:
+            entry.title = bookmark[2]
+            entry.description = bookmark[3]
+            entry.save()
             items_created += 1
         else:
             items_existing += 1
+    
     return (items_created, items_existing)

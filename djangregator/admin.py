@@ -27,7 +27,7 @@
 from django.contrib import admin
 from djangregator.models import *
 
-class ActivityEntryAdmin(admin.TabularInline):
+class ActivityEntryAdmin(admin.ModelAdmin):
     list_display = ('title', 'link', 'published')
     date_hierarchy = 'published'
     ordering = ('-published',)

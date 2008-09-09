@@ -35,7 +35,9 @@ def fetch(credentials):
     
     from djangregator.backends.flickr.models import *
     import flickrapi
-    
+    from datetime import datetime
+    from dateutil import parser
+
     items_existing = 0
     items_created = 0
     flickr = flickrapi.FlickrAPI(credentials['api_key'], format='etree')
@@ -58,7 +60,7 @@ def fetch(credentials):
             )
             entry.square_thumb_link = base_url + u'_s.jpg'
             entry.image_500px_link = base_url + u'.jpg'
-            entry.taken_on_date = dateutil.parser.parse(photo.attrib['datetaken'])
+            entry.taken_on_date = parser.parse(photo.attrib['datetaken'])
             entry.save()
             items_created += 1
         else:
