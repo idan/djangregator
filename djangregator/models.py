@@ -68,6 +68,22 @@ class ActivityEntry(models.Model):
         return self.title or self.link
 
 
+class GenericServiceUser(models.Model):
+    """
+    Encapsulates the credentials necessary to fetch information from an online
+    service. Service specific backends in djangregator.backends may extend
+    for more service-specific needs.
+    """
+    username = models.CharField(blank=True, max_length=100)
+    
+    class Meta:
+        abstract = True
+    
+    def __unicode__(self):
+        return self.username
+
+
+
 def update_lifestream_entry(sender, instance, created, raw, **kwargs):
     """
     Post-save handler which creates or updates LifestreamItem instances

@@ -24,9 +24,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf import settings
-from djangregator.backends.twitter.models import *
-import twitter
+from djangregator.backends.twitter.models import TwitterStatus, TwitterUser
 from datetime import datetime
 
 def fetch(credentials):
@@ -37,8 +35,8 @@ def fetch(credentials):
     Returns a tuple containing the number of items created, and the number of 
     items updated or skipped.
     """
-
     
+    import twitter
     items_existing = 0
     items_created = 0
     twitterapi = twitter.Api()
@@ -47,7 +45,7 @@ def fetch(credentials):
         entry, created = TwitterStatus.objects.get_or_create(twitter_id=status.id, published=tweetdate)
         if created:
             entry.title = status.text
-            entry.link = u'http://twitter.com/%s/%s' % (settings.DJANGREGATOR_AUTH['twitter'], status.id)
+            entry.link = u'http://twitter.com/%s/%s' % (credentials['twitter'], status.id)
             entry.save()
             items_created += 1
         else:

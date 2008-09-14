@@ -24,8 +24,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.models import *
 from django.db.models import signals
+from djangregator.models import *
 
 class TwitterStatus(ActivityEntry):
     twitter_id          = models.PositiveIntegerField(blank=False, null=False, unique=True)
@@ -35,5 +35,15 @@ class TwitterStatus(ActivityEntry):
         verbose_name_plural = 'Twitter Statuses'
         db_table = 'djangregator_twitterstatus'
         
+signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.backends.twitter.models')
 
-signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.twitter.models')
+
+class TwitterUser(GenericServiceUser):
+    """
+    Describes all of the authentication credentials required for accesing
+    tweets from a specific Twitter user.
+    """
+    
+    class Meta(GenericServiceUser.Meta):
+        verbose_name = "Twitter User"
+        verbose_name_plural = "Twitter Users"

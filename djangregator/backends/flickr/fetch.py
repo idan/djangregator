@@ -24,6 +24,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from djangregator.backends.flickr.models import FlickrPhoto, FlickrUser
+from datetime import datetime
+from dateutil import parser
+
 def fetch(credentials):
     """
     Fetch a list of recent photos from the flickr servers using the supplied
@@ -31,15 +35,12 @@ def fetch(credentials):
     
     Returns a tuple containing the number of items created, and the number of 
     items updated or skipped.
-    """   
+    """
     
-    from djangregator.backends.flickr.models import *
     import flickrapi
-    from datetime import datetime
-    from dateutil import parser
-
     items_existing = 0
     items_created = 0
+    # TODO: what if we only have a username and no flickr userid? Get it.
     flickr = flickrapi.FlickrAPI(credentials['api_key'], format='etree')
     recentphotos = flickr.people_getPublicPhotos(user_id=credentials['userid'], extras='date_upload, date_taken')
     iter = recentphotos.getiterator('photo');

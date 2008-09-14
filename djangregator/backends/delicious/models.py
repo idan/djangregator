@@ -24,7 +24,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.db import models
 from django.db.models import signals
 from djangregator.models import *
 
@@ -36,6 +35,15 @@ class DeliciousLink(ActivityEntry):
         verbose_name_plural = 'Delicious Links'
         db_table = 'djangregator_deliciouslink'
         
+signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.backends.delicious.models')
 
 
-signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.delicious.models')
+class DeliciousUser(GenericServiceUser):
+    """
+    Describes all of the authentication credentials required for accesing
+    links from a specific Delicious user.
+    """
+    
+    class Meta(GenericServiceUser.Meta):
+        verbose_name = "Delicious User"
+        verbose_name_plural = "Delicious Users"

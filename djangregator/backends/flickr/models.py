@@ -24,19 +24,34 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.models import *
 from django.db.models import signals
+from djangregator.models import *
 
 class FlickrPhoto(ActivityEntry):
     photo_id            = models.PositiveIntegerField(blank=False, null=False, unique=True)
     square_thumb_link   = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     image_500px_link    = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     taken_on_date       = models.DateTimeField(blank=True, default=datetime.datetime.now)
-
+    
+    
     class Meta(ActivityEntry.Meta):
         verbose_name = 'Flickr Photo'
         verbose_name_plural = 'Flickr Photos'
         db_table = 'djangregator_flickrphoto'
 
+signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.backends.flickr.models')
 
-signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.flickr.models')
+
+class FlickrUser(GenericServiceUser):
+    """
+    Describes all of the authentication credentials required for accesing
+    photos from a specific Flickr user.
+    """
+    
+    userid              = models.CharField(blank=True, max_length=20) 
+    api_key             = models.CharField(blank=False, max_length=32)
+    api_secret          = models.CharField(blank=False, max_length=20) # max 16?
+
+    class Meta(GenericServiceUser.Meta):
+        verbose_name = "Flickr User"
+        verbose_name_plural = "Flickr Users"

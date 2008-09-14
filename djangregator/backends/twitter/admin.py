@@ -25,10 +25,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from django.contrib import admin
-from djangregator.admin import ActivityEntryAdmin
+from djangregator.admin import ActivityEntryAdmin, GenericUserAdmin
 from djangregator.backends.twitter.models import *
 
 class TwitterStatusAdmin(ActivityEntryAdmin):
     model = TwitterStatus
 
 admin.site.register(TwitterStatus, TwitterStatusAdmin)
+admin.site.register(TwitterUser, GenericUserAdmin)

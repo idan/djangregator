@@ -25,10 +25,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from django.contrib import admin
-from djangregator.admin import ActivityEntryAdmin
+from djangregator.admin import ActivityEntryAdmin, GenericUserAdmin
 from djangregator.backends.delicious.models import *
 
 class DeliciousLinkAdmin(ActivityEntryAdmin):
     model = DeliciousLink
 
 admin.site.register(DeliciousLink, DeliciousLinkAdmin)
+admin.site.register(DeliciousUser, GenericUserAdmin)

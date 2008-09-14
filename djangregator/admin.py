@@ -35,6 +35,8 @@ class ActivityEntryAdmin(admin.ModelAdmin):
 class LifestreamItemAdmin(admin.ModelAdmin):
     list_display = ('published', 'content_type')
     date_hierarchy = 'published'
-
+    
+class GenericUserAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(LifestreamItem, LifestreamItemAdmin)

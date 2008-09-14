@@ -1,3 +1,19 @@
 Documentation
 =============
 
+
+
+FAQ
+---
+
+1. I'd like to fetch tweets/photos/etc. which are marked private in my feeds,
+   but I don't see anywhere to configure that. What gives?
+   
+   Djangregator was written with the use-case of integration with a blog,
+   which is usually a public forum. If you have private items in your
+   Flickr photostream, or you have made your tweets private, then it doesn't
+   make very much sense to publicly display them elsewhere, does it?
+   
+   In other words: I don't have any use for this feature. If somebody comes up
+   with a compelling reason to add it, I might. Otherwise -- submit patches
+   or fork to your heart's content.

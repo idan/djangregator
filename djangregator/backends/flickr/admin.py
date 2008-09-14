@@ -25,10 +25,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from django.contrib import admin
-from djangregator.admin import ActivityEntryAdmin
+from djangregator.admin import ActivityEntryAdmin, GenericUserAdmin
 from djangregator.backends.flickr.models import *
 
 class FlickrPhotoAdmin(ActivityEntryAdmin):
     model = FlickrPhoto
     
 admin.site.register(FlickrPhoto, FlickrPhotoAdmin)
+admin.site.register(FlickrUser, GenericUserAdmin)
