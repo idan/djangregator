@@ -24,11 +24,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.backends.flickr.models import FlickrPhoto, FlickrUser
+from djangregator.models import FlickrPhoto, FlickrAccount
 from datetime import datetime
 from dateutil import parser
+import calendar
+import logging
 
-def fetch(credentials):
+def fetch(account):
     """
     Fetch a list of recent photos from the flickr servers using the supplied
     credentials, and save them to the DB.
@@ -40,17 +42,35 @@ def fetch(credentials):
     import flickrapi
     items_existing = 0
     items_created = 0
-    # TODO: what if we only have a username and no flickr userid? Get it.
-    flickr = flickrapi.FlickrAPI(credentials['api_key'], format='etree')
-    recentphotos = flickr.people_getPublicPhotos(user_id=credentials['userid'], extras='date_upload, date_taken')
+    flickr = flickrapi.FlickrAPI(account.api_key, format='etree')
+    
+    # check that the nsid is present, if not fetch it and save to the model
+    if not ta.userid:
+        try:
+            nsidd = flickr.people_findByUsername(username=account.username).user[0]['nsid']
+        except:
+            return (0, 0) # TODO: gperhaps a more useful exception handler?
+        ta.nsid = nsid
+        ta.save()
+    
+    # get the latest photo we already have
+    try:
+        latestphoto = FlickrPhoto.objects.latest()
+        latestdate = latestphoto.published
+    except:
+        latestdate = datetime.datetime.min
+    
+    timestamp = calendar.timegm(latestdate)
+    recentphotos = flickr.photos_search(userid=account.userid, per_page=500, min_upload_date=timestamp, extras='date_upload, date_taken')
     iter = recentphotos.getiterator('photo');
     for photo in iter:
         upload_date = datetime.fromtimestamp(int(photo.attrib['dateupload']))
+        if upload_date <
         entry, created = FlickrPhoto.objects.get_or_create(photo_id=photo.attrib['id'], published=upload_date)
         if created:
             entry.title = photo.attrib['title']
             entry.link = u'http://flickr.com/photos/%s/%s' % (
-                credentials['userid'],
+                account.userid,
                 entry.photo_id
             )
             base_url = u'http://farm%s.static.flickr.com/%s/%s_%s' % (

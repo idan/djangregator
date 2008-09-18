@@ -25,18 +25,39 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from django.contrib import admin
+from django.contrib.contenttypes import generic
 from djangregator.models import *
 
-class ActivityEntryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'link', 'published')
-    date_hierarchy = 'published'
-    ordering = ('-published',)
-
-class LifestreamItemAdmin(admin.ModelAdmin):
+class LifestreamEntryAdmin(admin.ModelAdmin):
     list_display = ('published', 'content_type')
     date_hierarchy = 'published'
     
-class GenericUserAdmin(admin.ModelAdmin):
-    pass
+class ActivityEntryAdmin(admin.ModelAdmin):
+    date_hierarchy = 'published'
 
-admin.site.register(LifestreamItem, LifestreamItemAdmin)
+class GenericServiceAccountAdmin(admin.TabularInline):
+    extra = 1
+
+class TwitterAccountAdmin(GenericServiceAccountAdmin):
+    model = TwitterAccount
+
+class DeliciousAccountAdmin(GenericServiceAccountAdmin):
+    model = DeliciousAccount
+
+class FlickrAccountAdmin(GenericServiceAccountAdmin):
+    model = FlickrAccount
+
+class OnlinePersonaAdmin(admin.ModelAdmin):
+    inlines = (
+        TwitterAccountAdmin,
+        DeliciousAccountAdmin,
+        FlickrAccountAdmin
+    )
+
+admin.site.register(LifestreamEntry, LifestreamEntryAdmin)
+admin.site.register(OnlinePersona, OnlinePersonaAdmin)
+
+# Service-specific models
+admin.site.register(TwitterStatus, ActivityEntryAdmin)
+admin.site.register(DeliciousLink, ActivityEntryAdmin)
+admin.site.register(FlickrPhoto, ActivityEntryAdmin)

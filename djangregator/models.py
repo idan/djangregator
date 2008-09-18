@@ -30,10 +30,13 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 import datetime
 
-class LifestreamItem(models.Model):
+##############################################################################
+# Common/Abstract Djangregator Models
+##############################################################################
+
+class LifestreamEntry(models.Model):
     """
-    Generically related to one or more instances of activity from a specific
-    online service.
+    Generically related to an activity entry from any online service.
     """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -43,24 +46,46 @@ class LifestreamItem(models.Model):
     class Meta:
         ordering = ['-published']
         get_latest_by = 'published'
-        verbose_name = 'Generic Lifestream Entry'
-        verbose_name_plural = 'Generic Lifestream Entries'
+        verbose_name = 'Lifestream Entry'
+        verbose_name_plural = 'Lifestream Entries'
 
 
-class ActivityEntry(models.Model):
+class OnlinePersona(models.Model):
     """
-    An abstract base class which backends can extend to cover service-specific
-    information.
+    Generically related to one or more different service accounts.
     """
-    published           = models.DateTimeField(null=False, blank=False)
-    title               = models.CharField(max_length=255, null=True, blank=True)
-    link                = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    lifestream_item     = generic.GenericRelation(LifestreamItem)
+    name = models.CharField(null=False, blank=False, max_length=100)
+    
+    class Meta:
+        ordering = ['name',]
+        verbose_name = "Online Persona"
+        verbose_name_plural = "Online Personas"
+    
+    def __unicode__(self):
+        return self.name
+    
+    def accounts(self):
+        related_managers = [getattr(self, method) for method in dir(self) if method.endswith('_accounts')]
+        accounts = []
+        for related in related_managers:
+            for account in related.iterator():
+                accounts.append(account)
+        return accounts
+            
+
+
+class AbstractActivityEntry(models.Model):
+    """
+    An abstract base class which encapsulates the common information which
+    describes activities from all sources of online activity.
+    """
+    published = models.DateTimeField(null=False, blank=False)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
+    lifestream_entry = generic.GenericRelation(LifestreamEntry)
     
     class Meta:
         ordering = ['-published']
-        verbose_name = 'Entry'
-        verbose_name_plural = 'Entries'
         get_latest_by = 'published'
         abstract = True
         
@@ -68,13 +93,14 @@ class ActivityEntry(models.Model):
         return self.title or self.link
 
 
-class GenericServiceUser(models.Model):
+class AbstractServiceAccount(models.Model):
     """
-    Encapsulates the credentials necessary to fetch information from an online
-    service. Service specific backends in djangregator.backends may extend
-    for more service-specific needs.
+    Encapsulates the common credentials necessary to fetch information from
+    any online service. Extend this class to implement support for a new
+    online service.
     """
     username = models.CharField(blank=True, max_length=100)
+    active = models.BooleanField(default=True, help_text="Uncheck to disable synchronization with this account")
     
     class Meta:
         abstract = True
@@ -83,18 +109,121 @@ class GenericServiceUser(models.Model):
         return self.username
 
 
-
 def update_lifestream_entry(sender, instance, created, raw, **kwargs):
     """
-    Post-save handler which creates or updates LifestreamItem instances
-    whenever backend-specific model instances are saved.
+    Post-save handler which creates or updates LifestreamEntry instances
+    whenever service-specific model instances are saved.
     """
-
     if created:
-        item = LifestreamItem()
+        item = LifestreamEntry()
         item.content_type = ContentType.objects.get_for_model(type(instance))
         item.object_id = instance.id
     else:
-        item = instance.lifestream_item.all()[0]
+        item = instance.lifestream_entry.all()[0]
     item.published = instance.published
     item.save()
+
+
+##############################################################################
+# Twitter
+##############################################################################
+
+class TwitterStatus(AbstractActivityEntry):
+    """
+    Represents a single tweet from Twitter.
+    """
+    twitter_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
+    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Twitter Status'
+        verbose_name_plural = 'Twitter Statuses'
+
+
+signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.models')
+
+class TwitterAccount(AbstractServiceAccount):
+    """
+    Encapsulates all of the authentication credentials required for accesing
+    tweets from a specific Twitter user.
+    """
+    persona = models.ForeignKey(OnlinePersona, related_name="twitter_accounts")
+    
+    class Meta:
+        verbose_name = "Twitter Account"
+        verbose_name_plural = "Twitter Accounts"
+    
+    service = u'twitter'
+
+
+##############################################################################
+# Delicious
+##############################################################################
+
+class DeliciousLink(AbstractActivityEntry):
+    """
+    Represents a single link from Delicious.
+    """
+    description = models.TextField(blank=True)
+    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Delicious Link'
+        verbose_name_plural = 'Delicious Links'
+    
+    service = u'delicious'
+
+
+signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.models')
+
+class DeliciousAccount(AbstractServiceAccount):
+    """
+    Encapsulates all of the authentication credentials required for accesing
+    links from a specific Delicious user.
+    """
+    persona = models.ForeignKey(OnlinePersona, related_name="delicious_accounts")
+    
+    class Meta:
+        verbose_name = "Delicious Account"
+        verbose_name_plural = "Delicious Accounts"
+    
+    service = u'delicious'
+
+##############################################################################
+# Flickr
+##############################################################################
+
+class FlickrPhoto(AbstractActivityEntry):
+    """
+    Represents a single photo from Flickr.
+    """
+    photo_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
+    square_thumb_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
+    image_500px_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
+    taken_on_date = models.DateTimeField(blank=True, default=datetime.datetime.now)
+    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Flickr Photo'
+        verbose_name_plural = 'Flickr Photos'
+
+
+signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.models')
+
+class FlickrAccount(AbstractServiceAccount):
+    """
+    Describes all of the authentication credentials required for accesing
+    photos from a specific Flickr user.
+    """
+    persona = models.ForeignKey(OnlinePersona, related_name="flickr_accounts")
+    userid = models.CharField(blank=True, max_length=20) 
+    api_key = models.CharField(blank=False, max_length=32)
+    api_secret = models.CharField(blank=True, max_length=20) # max 16?
+    
+    class Meta:
+        verbose_name = "Flickr Account"
+        verbose_name_plural = "Flickr Accounts"
+    
+    def __unicode__(self):
+        return self.username or self.userid
+    
+    service = u'flickr'
+    
+    

@@ -24,18 +24,25 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf import settings
+from djangregator.models import *
 import logging
 
+logging.basicConfig(level=logging.DEBUG)
+
 def fetch():
-    for service in settings.DJANGREGATOR_AUTH:
-        logging.info("Fetching entries from %s" % service)
-        modulename = "djangregator.backends.%s" % service
-        try:
-            module = __import__(modulename, globals(), locals(), ['fetch'])
-        except:
-            logging.error("Unable to locate a backend for syncing with %s. Skipping..." % service)
-            continue
+    personas = OnlinePersona.objects.all()
+    for persona in personas:
+        logging.info("Fetching accounts related to \"%s\"" % persona.name)
+        accounts = persona.accounts()
+        for account in accounts:
+            logging.info("Fetching activity from %s account \"%s\"" % (account.service, account))
             
-        (created, existing) = module.fetch(settings.DJANGREGATOR_AUTH[service])
-        logging.info('%s: synced %s new, %s existing' % (service, created, existing))
+            modulename = "djangregator.services.%s" % account.service
+            try:
+                module = __import__(modulename, globals(), locals(), ['fetch'])
+            except:
+                logging.error("Unable to load a backend for syncing with %s. Skipping..." % account.service)
+                continue
+                
+            (created, existing) = module.fetch(account)
+            logging.info('%s: synced %s new, %s existing' % (account.service, created, existing))

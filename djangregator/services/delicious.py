@@ -24,12 +24,31 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.contrib import admin
-from djangregator.admin import ActivityEntryAdmin, GenericUserAdmin
-from djangregator.backends.twitter.models import *
+from djangregator.models import DeliciousLink, DeliciousAccount
 
-class TwitterStatusAdmin(ActivityEntryAdmin):
-    model = TwitterStatus
-
-admin.site.register(TwitterStatus, TwitterStatusAdmin)
-admin.site.register(TwitterUser, GenericUserAdmin)
+def fetch(account):
+    """
+    Fetch a list of recent bookmarks from the delicious servers using the
+    supplied credentials, and save them to the DB.
+    
+    Returns a tuple containing the number of items created, and the number of 
+    items updated or skipped.
+    """
+    
+    import deliciousapi
+    items_existing = 0
+    items_created = 0
+    deliciousapi = deliciousapi.DeliciousAPI()
+    for bookmark in deliciousapi.get_bookmarks(username=account.username):
+        entry, created = DeliciousLink.objects.get_or_create(
+            link = bookmark[0],
+            published = bookmark[4])
+        if created:
+            entry.title = bookmark[2]
+            entry.description = bookmark[3]
+            entry.save()
+            items_created += 1
+        else:
+            items_existing += 1
+    
+    return (items_created, items_existing)

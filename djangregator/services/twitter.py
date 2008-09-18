@@ -24,29 +24,28 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from djangregator.backends.delicious.models import DeliciousLink, DeliciousUser
+from djangregator.models import TwitterStatus, TwitterAccount
+from datetime import datetime
 
-
-def fetch(credentials):
+def fetch(twitteruser):
     """
-    Fetch a list of recent bookmarks from the delicious servers using the
-    supplied credentials, and save them to the DB.
+    Fetch a list of recent tweets from the twitter servers using the supplied
+    credentials, and save them to the DB.
     
     Returns a tuple containing the number of items created, and the number of 
     items updated or skipped.
     """
     
-    import deliciousapi
+    import twitter as python_twitter
     items_existing = 0
     items_created = 0
-    deliciousapi = deliciousapi.DeliciousAPI()
-    for bookmark in deliciousapi.get_bookmarks(username=credentials['username']):
-        entry, created = DeliciousLink.objects.get_or_create(
-            link = bookmark[0],
-            published = bookmark[4])
+    twitterapi = python_twitter.Api()
+    for status in twitterapi.GetUserTimeline(twitteruser.username):
+        tweetdate = datetime.strptime(status.created_at, '%a %b %d %H:%M:%S +0000 %Y')
+        entry, created = TwitterStatus.objects.get_or_create(twitter_id=status.id, published=tweetdate)
         if created:
-            entry.title = bookmark[2]
-            entry.description = bookmark[3]
+            entry.title = status.text
+            entry.link = u'http://twitter.com/%s/%s' % (twitteruser.username, status.id)
             entry.save()
             items_created += 1
         else:
