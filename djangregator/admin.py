@@ -31,6 +31,7 @@ from djangregator.models import *
 class LifestreamEntryAdmin(admin.ModelAdmin):
     list_display = ('published', 'content_type')
     date_hierarchy = 'published'
+    list_filter = ('content_type',)
     
 class ActivityEntryAdmin(admin.ModelAdmin):
     date_hierarchy = 'published'

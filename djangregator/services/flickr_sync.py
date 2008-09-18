@@ -42,30 +42,34 @@ def fetch(account):
     import flickrapi
     items_existing = 0
     items_created = 0
-    flickr = flickrapi.FlickrAPI(account.api_key, format='etree')
+    api = flickrapi.FlickrAPI(account.api_key, format='etree')
     
     # check that the nsid is present, if not fetch it and save to the model
-    if not ta.userid:
+    if not account.userid:
         try:
-            nsidd = flickr.people_findByUsername(username=account.username).user[0]['nsid']
+            account.userid = api.people_findByUsername(username=account.username).find('user').attrib['nsid']
+            account.save()
         except:
             return (0, 0) # TODO: gperhaps a more useful exception handler?
-        ta.nsid = nsid
-        ta.save()
-    
     # get the latest photo we already have
     try:
         latestphoto = FlickrPhoto.objects.latest()
-        latestdate = latestphoto.published
+        timestamp = calendar.timegm(latestphoto.published.timetuple())
     except:
-        latestdate = datetime.datetime.min
+        latestdate = datetime.min
     
-    timestamp = calendar.timegm(latestdate)
-    recentphotos = flickr.photos_search(userid=account.userid, per_page=500, min_upload_date=timestamp, extras='date_upload, date_taken')
+    extras = 'date_upload, date_taken'
+    per_page = 500
+    if FlickrPhoto.objects.count() > 0:
+        latestphoto = FlickrPhoto.objects.latest()
+        timestamp = calendar.timegm(latestphoto.published.timetuple())
+        recentphotos = api.photos_search(user_id=account.userid, per_page=per_page, min_upload_date=timestamp, extras=extras)
+    else:
+        recentphotos = api.people_getPublicPhotos(user_id=account.userid, per_page=per_page, extras=extras)
+    
     iter = recentphotos.getiterator('photo');
     for photo in iter:
         upload_date = datetime.fromtimestamp(int(photo.attrib['dateupload']))
-        if upload_date <
         entry, created = FlickrPhoto.objects.get_or_create(photo_id=photo.attrib['id'], published=upload_date)
         if created:
             entry.title = photo.attrib['title']

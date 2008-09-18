@@ -36,10 +36,10 @@ def fetch(twitteruser):
     items updated or skipped.
     """
     
-    import twitter as python_twitter
+    import twitter
     items_existing = 0
     items_created = 0
-    twitterapi = python_twitter.Api()
+    twitterapi = twitter.Api()
     for status in twitterapi.GetUserTimeline(twitteruser.username):
         tweetdate = datetime.strptime(status.created_at, '%a %b %d %H:%M:%S +0000 %Y')
         entry, created = TwitterStatus.objects.get_or_create(twitter_id=status.id, published=tweetdate)

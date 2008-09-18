@@ -30,19 +30,25 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 def fetch():
+    logging.info("Commencing fetch.")
     personas = OnlinePersona.objects.all()
     for persona in personas:
         logging.info("Fetching accounts related to \"%s\"" % persona.name)
         accounts = persona.accounts()
         for account in accounts:
+            if not account.active:
+                logging.info("Skipping inactive %s account \"%s\"" % (account.service, account))
+                continue
+            
             logging.info("Fetching activity from %s account \"%s\"" % (account.service, account))
             
-            modulename = "djangregator.services.%s" % account.service
+            modulename = "djangregator.services.%s_sync" % account.service
             try:
                 module = __import__(modulename, globals(), locals(), ['fetch'])
             except:
-                logging.error("Unable to load a backend for syncing with %s. Skipping..." % account.service)
+                logging.exception("Unable to load a backend for syncing with %s. Skipping..." % account.service)
                 continue
                 
             (created, existing) = module.fetch(account)
             logging.info('%s: synced %s new, %s existing' % (account.service, created, existing))
+    logging.info("Fetch complete.")
