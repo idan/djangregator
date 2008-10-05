@@ -36,24 +36,25 @@ activity from the various online services configured in your project.
 import sys
 import os
 import logging
-import djangregator
 
 ROOT_PATH = os.path.realpath(os.path.dirname(__file__))
 PROJECT_PATH, PROJECT_DIR = os.path.split(ROOT_PATH)
 
 #logging.basicConfig(level=logging.INFO)
 
-logging.info('ROOT_PATH: %s' % ROOT_PATH)
-logging.info('PROJECT_PATH: %s' % PROJECT_PATH)
-logging.info('PROJECT_DIR: %s' % PROJECT_DIR)
+logging.debug('ROOT_PATH: %s' % ROOT_PATH)
+logging.debug('PROJECT_PATH: %s' % PROJECT_PATH)
+logging.debug('PROJECT_DIR: %s' % PROJECT_DIR)
 
 sys.path.insert(0, ROOT_PATH)
 sys.path.insert(1, PROJECT_PATH)
 
-logging.info('sys.path: %s' % sys.path)
+logging.debug('sys.path: %s' % sys.path)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % PROJECT_DIR
 
-logging.info('os.environ[DJANGO_SETTINGS_MODULE]: %s' % os.environ['DJANGO_SETTINGS_MODULE'])
+logging.debug('os.environ[DJANGO_SETTINGS_MODULE]: %s' % os.environ['DJANGO_SETTINGS_MODULE'])
 
+
+import djangregator
 djangregator.fetch()
