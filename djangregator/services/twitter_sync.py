@@ -37,11 +37,25 @@ def fetch(twitteruser):
     """
     
     import twitter
+    import rfc822
+    import datetime
     items_existing = 0
     items_created = 0
     twitterapi = twitter.Api()
-    for status in twitterapi.GetUserTimeline(twitteruser.username):
-        tweetdate = datetime.strptime(status.created_at, '%a %b %d %H:%M:%S +0000 %Y')
+    
+    # get the latest tweet we already have
+    try:
+        latesttweet = TwitterStatus.objects.latest()
+        latestdate = latesttweet.published.strftime("%a %b %d %H:%M:%S +0000 %Y")
+    except:
+        latestdate = datetime.min.strftime("%a %b %d %H:%M:%S +0000 %Y")
+        
+    for status in twitterapi.GetUserTimeline(user=twitteruser.username, since=latestdate):
+        try:
+            tweetdate = datetime.datetime(*rfc822.parsedate(status.created_at)[:6])
+        except: # TODO: more specific exception handling?
+            continue
+        
         entry, created = TwitterStatus.objects.get_or_create(twitter_id=status.id, published=tweetdate)
         if created:
             entry.title = status.text
