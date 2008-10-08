@@ -128,19 +128,6 @@ def update_lifestream_entry(sender, instance, created, raw, **kwargs):
 # Twitter
 ##############################################################################
 
-class TwitterStatus(AbstractActivityEntry):
-    """
-    Represents a single tweet from Twitter.
-    """
-    twitter_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
-    
-    class Meta(AbstractActivityEntry.Meta):
-        verbose_name = 'Twitter Status'
-        verbose_name_plural = 'Twitter Statuses'
-
-
-signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.models')
-
 class TwitterAccount(AbstractServiceAccount):
     """
     Encapsulates all of the authentication credentials required for accesing
@@ -155,24 +142,24 @@ class TwitterAccount(AbstractServiceAccount):
     service = u'twitter'
 
 
+class TwitterStatus(AbstractActivityEntry):
+    """
+    Represents a single tweet from Twitter.
+    """
+    account = models.ForeignKey(TwitterAccount, related_name="tweets")
+    twitter_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
+    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Twitter Status'
+        verbose_name_plural = 'Twitter Statuses'    
+
+
+signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.models')
+
+
 ##############################################################################
 # Delicious
 ##############################################################################
-
-class DeliciousLink(AbstractActivityEntry):
-    """
-    Represents a single link from Delicious.
-    """
-    description = models.TextField(blank=True)
-    
-    class Meta(AbstractActivityEntry.Meta):
-        verbose_name = 'Delicious Link'
-        verbose_name_plural = 'Delicious Links'
-    
-    service = u'delicious'
-
-
-signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.models')
 
 class DeliciousAccount(AbstractServiceAccount):
     """
@@ -187,25 +174,27 @@ class DeliciousAccount(AbstractServiceAccount):
     
     service = u'delicious'
 
+
+class DeliciousLink(AbstractActivityEntry):
+    """
+    Represents a single link from Delicious.
+    """
+    account = models.ForeignKey(DeliciousAccount, related_name="links")
+    description = models.TextField(blank=True)
+    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Delicious Link'
+        verbose_name_plural = 'Delicious Links'
+    
+    service = u'delicious'
+
+
+signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.models')
+
+
 ##############################################################################
 # Flickr
 ##############################################################################
-
-class FlickrPhoto(AbstractActivityEntry):
-    """
-    Represents a single photo from Flickr.
-    """
-    photo_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
-    square_thumb_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    image_500px_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    taken_on_date = models.DateTimeField(blank=True, default=datetime.datetime.now)
-    
-    class Meta(AbstractActivityEntry.Meta):
-        verbose_name = 'Flickr Photo'
-        verbose_name_plural = 'Flickr Photos'
-
-
-signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.models')
 
 class FlickrAccount(AbstractServiceAccount):
     """
@@ -225,5 +214,22 @@ class FlickrAccount(AbstractServiceAccount):
         return self.username or self.userid
     
     service = u'flickr'
+
+
+class FlickrPhoto(AbstractActivityEntry):
+    """
+    Represents a single photo from Flickr.
+    """
+    account = models.ForeignKey(FlickrAccount, related_name="photos")
+    photo_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
+    square_thumb_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
+    image_500px_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
+    taken_on_date = models.DateTimeField(blank=True, default=datetime.datetime.now)
     
-    
+    class Meta(AbstractActivityEntry.Meta):
+        verbose_name = 'Flickr Photo'
+        verbose_name_plural = 'Flickr Photos'
+
+
+signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.models')
+
