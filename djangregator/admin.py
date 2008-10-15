@@ -36,7 +36,7 @@ class LifestreamEntryAdmin(admin.ModelAdmin):
 class ActivityEntryAdmin(admin.ModelAdmin):
     date_hierarchy = 'published'
 
-class GenericServiceAccountAdmin(admin.TabularInline):
+class GenericServiceAccountAdmin(admin.StackedInline):
     extra = 1
 
 class TwitterAccountAdmin(GenericServiceAccountAdmin):

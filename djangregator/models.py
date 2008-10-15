@@ -99,7 +99,7 @@ class AbstractServiceAccount(models.Model):
     any online service. Extend this class to implement support for a new
     online service.
     """
-    username = models.CharField(blank=True, max_length=100)
+    username = models.CharField(blank=False, max_length=100)
     active = models.BooleanField(default=True, help_text="Uncheck to disable synchronization with this account")
     
     class Meta:
@@ -202,7 +202,7 @@ class FlickrAccount(AbstractServiceAccount):
     photos from a specific Flickr user.
     """
     persona = models.ForeignKey(OnlinePersona, related_name="flickr_accounts")
-    userid = models.CharField(blank=True, max_length=20) 
+    userid = models.CharField(blank=True, max_length=20, editable=False) 
     api_key = models.CharField(blank=False, max_length=32)
     api_secret = models.CharField(blank=True, max_length=20) # max 16?
     
