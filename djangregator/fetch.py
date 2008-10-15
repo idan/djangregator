@@ -42,7 +42,7 @@ def fetch():
             
             logging.info("Fetching activity from %s account \"%s\"" % (account.service, account))
             
-            modulename = "djangregator.services.%s_sync" % account.service
+            modulename = "djangregator.services.%s" % account.service
             try:
                 module = __import__(modulename, globals(), locals(), ['fetch'])
             except:
