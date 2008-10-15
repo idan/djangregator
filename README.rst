@@ -1,3 +1,11 @@
+============
+Djangregator
+============
+
+-------------------------------------------------------------------------------------------
+A lifestream aggregation application for sites built using the Django web framework.
+-------------------------------------------------------------------------------------------
+
 About
 =====
 
@@ -15,6 +23,8 @@ Djangregator currently supports the following sources of information:
 
 I wrote it because I wanted to try my hand at a problem that was a little larger than just "Write a blog". Along the way I had to learn about signals, the ORM, writing template tags, model inheritance -- all sorts of subjects that one needs to grok before diving into something larger.
 
+You can follow and contribute to djangregator's development happens at http://github.com/idangazit/djangregator/.
+
 
 License
 =======
@@ -30,13 +40,12 @@ Djangregator requires:
 * Python 2.5
 * Django 1.0
 
-Sadly, there is no unified API for accessing different sites. The following libraries are required for interfacing with the relevant site. Note that if a library is not present, djangregator will simply skip that site, even if it has been configured in the settings.
+Sadly, there is no unified API for accessing different sites. The following libraries are required for interfacing with the relevant site. Note that if a library is not present, djangregator will simply skip that service when fetching updates, even if the service has been configured for fetching.
 
 * python-twitter - http://code.google.com/p/python-twitter/
-* DeliciousAPI - http://pypi.python.org/pypi/DeliciousAPI
-    * BeautifulSoup - required for DeliciousAPI
+* DeliciousAPI - http://pypi.python.org/pypi/DeliciousAPI (requires BeautifulSoup - required for DeliciousAPI
 * FlickrAPI - http://flickrapi.sourceforge.net/
-    * ElementTree - included in python 2.5 used by FlickrAPI
+  * ElementTree - included in python 2.5 used by FlickrAPI
   
   
 Credits
@@ -44,16 +53,24 @@ Credits
 
 Djangregator is heavily inspired by (read: blatantly ripped off from) several django luminaries' efforts. Each of these are worth reading and knowing if you are learning Django!
 
-* Ryan Berg: the original inspiration for this project. Ryan shows how he implemented his aggregation system on his blog, which has been an endless source of wisdom and education.
+Ryan Berg
+---------
+The original inspiration for this project. Ryan shows how he implemented his aggregation system on his blog, which has been an endless source of wisdom and education.
     * http://ryanberg.net
 
-* Horst Gutmann: is a talented blogger who also wrote a django application for dealing with lifestreams, appropriately titled "django-lifestream". He also has some very useful advice to impart about using generic relations in the Django ORM in his blog.
+Horst Gutmann
+-------------
+A talented blogger who also wrote a django application for dealing with lifestreams, appropriately titled "django-lifestream". He also has some very useful advice to impart about using generic relations in the Django ORM in his blog.
     * http://zerokspot.com
     * http://code.google.com/p/django-lifestream/
 
-* Nuno Mariz: shows how to accomplish the same thing as djangregator with a lot less work by leveraging the fact that FriendFeed offers an API into its already-aggregated lifestream. The code for the cron script is largely based on his example.
+Nuno Mariz
+----------
+Shows how to accomplish the same thing as djangregator with a lot less work by leveraging the fact that FriendFeed offers an API into its already-aggregated lifestream. The code for the cron script is largely based on his example.
     * http://mariz.org/blog/2008/apr/04/internet-lifestream-with-django/
 
-* Jesse Legg: authored another project similar to djangregator, if "similar" were a synonym for "a lot more polished" and "written long before mine".
+Jesse Legg
+----------
+Authored another project similar to djangregator, if "similar" were a synonym for "a lot more polished" and "written long before mine".
     * http://jesselegg.com/
     * http://code.google.com/p/django-syncr/
