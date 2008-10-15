@@ -42,10 +42,11 @@ Djangregator requires:
 
 Sadly, there is no unified API for accessing different sites. The following libraries are required for interfacing with the relevant site. Note that if a library is not present, djangregator will simply skip that service when fetching updates, even if the service has been configured for fetching.
 
-* python-twitter - http://code.google.com/p/python-twitter/
-* DeliciousAPI - http://pypi.python.org/pypi/DeliciousAPI (requires BeautifulSoup - required for DeliciousAPI
+* python-twitter - http://github.com/idangazit/python-twitter **(Note: this is a fork of the original python-twitter based at http://code.google.com/p/python-twitter/)
+* SimpleJson - http://cheeseshop.python.org/pypi/simplejson
+* DeliciousAPI - http://pypi.python.org/pypi/DeliciousAPI
+* BeautifulSoup - required for DeliciousAPI
 * FlickrAPI - http://flickrapi.sourceforge.net/
-  * ElementTree - included in python 2.5 used by FlickrAPI
   
   
 Credits
