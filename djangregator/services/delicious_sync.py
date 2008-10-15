@@ -41,6 +41,7 @@ def fetch(account):
     api = deliciousapi.DeliciousAPI()
     for bookmark in api.get_bookmarks(username=account.username):
         entry, created = DeliciousLink.objects.get_or_create(
+            account = account,
             link = bookmark[0],
             published = bookmark[4])
         if created:

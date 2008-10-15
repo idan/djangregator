@@ -70,7 +70,10 @@ def fetch(account):
     iter = recentphotos.getiterator('photo');
     for photo in iter:
         upload_date = datetime.fromtimestamp(int(photo.attrib['dateupload']))
-        entry, created = FlickrPhoto.objects.get_or_create(photo_id=photo.attrib['id'], published=upload_date)
+        entry, created = FlickrPhoto.objects.get_or_create(
+            account = account,
+            photo_id = photo.attrib['id'],
+            published = upload_date)
         if created:
             entry.title = photo.attrib['title']
             entry.link = u'http://flickr.com/photos/%s/%s' % (
