@@ -58,12 +58,19 @@ parser.add_option("-p", "--projectpath",
 
 logging.basicConfig(level=logging.getLevelName(options.loglevel))
 
-logging.info('Project Path: %s' % options.projectpath)
-PATH_HEAD, PATH_TAIL = os.path.split(options.projectpath)
+selectedpath = os.path.realpath(os.path.normpath(options.projectpath))
+
+if not os.path.exists(selectedpath):
+    logging.fatal('The specified directory does not exist: "%s"' % selectedpath)
+
+logging.info('Project Path: %s' % selectedpath)
+PATH_HEAD, PATH_TAIL = os.path.split(selectedpath)
 logging.debug('Project Path Head: %s' % PATH_HEAD)
 logging.debug('Project Path Tail: %s' % PATH_TAIL)
 
-sys.path.insert(0, options.projectpath)
+os.chdir(options.projectpath)
+
+sys.path.insert(0, selectedpath)
 sys.path.insert(1, PATH_HEAD)
 
 logging.debug('sys.path: %s' % sys.path)
