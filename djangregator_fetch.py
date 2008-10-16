@@ -36,25 +36,42 @@ activity from the various online services configured in your project.
 import sys
 import os
 import logging
+from optparse import OptionParser
 
-ROOT_PATH = os.path.realpath(os.path.dirname(__file__))
-PROJECT_PATH, PROJECT_DIR = os.path.split(ROOT_PATH)
+CURRENT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-#logging.basicConfig(level=logging.INFO)
+usage = "usage: %prog [options]"
+parser = OptionParser(usage=usage)
+parser.add_option("-l", "--loglevel",
+                  dest="loglevel",
+                  help="Logging verbosity level, one of (DEBUG, INFO, WARNING, ERROR, FATAL) [default: %default]",
+                  default="INFO",
+                  metavar="LOGLEVEL")
+parser.add_option("-p", "--projectpath",
+                  dest="projectpath",
+                  help="Path to the django project (the directory containing the settings.py file)",
+                  default=CURRENT_PATH,
+                  metavar="PATH"
+                  )
 
-logging.debug('ROOT_PATH: %s' % ROOT_PATH)
-logging.debug('PROJECT_PATH: %s' % PROJECT_PATH)
-logging.debug('PROJECT_DIR: %s' % PROJECT_DIR)
+(options, args) = parser.parse_args()
 
-sys.path.insert(0, ROOT_PATH)
-sys.path.insert(1, PROJECT_PATH)
+logging.basicConfig(level=logging.getLevelName(options.loglevel))
+
+logging.info('Project Path: %s' % options.projectpath)
+PATH_HEAD, PATH_TAIL = os.path.split(options.projectpath)
+logging.debug('Project Path Head: %s' % PATH_HEAD)
+logging.debug('Project Path Tail: %s' % PATH_TAIL)
+
+sys.path.insert(0, options.projectpath)
+sys.path.insert(1, PATH_HEAD)
 
 logging.debug('sys.path: %s' % sys.path)
 
-os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % PROJECT_DIR
+os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % PATH_TAIL
 
 logging.debug('os.environ[DJANGO_SETTINGS_MODULE]: %s' % os.environ['DJANGO_SETTINGS_MODULE'])
 
-
+# check that the project actually has djangregator installed and tables created?
 import djangregator
 djangregator.fetch()
