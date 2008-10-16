@@ -48,7 +48,11 @@ def fetch():
             except:
                 logging.exception("Unable to load a backend for syncing with %s. Skipping..." % account.service)
                 continue
+            
+            try:
+                (created, existing) = module.fetch(account)
+                logging.info('%s: synced %s new, %s existing' % (account.service, created, existing))
+            except:
+                logging.error('%s: sync failed' % account.service)
                 
-            (created, existing) = module.fetch(account)
-            logging.info('%s: synced %s new, %s existing' % (account.service, created, existing))
     logging.info("Fetch complete.")
