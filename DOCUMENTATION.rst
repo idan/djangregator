@@ -1,6 +1,10 @@
-=============
-Documentation
-=============
+==========================
+Djangregator Documentation
+==========================
+
+----------------------------------------------------------------
+Getting, Installing, Configuring, and Understanding Djangregator
+----------------------------------------------------------------
 
 Installation
 ============
@@ -13,7 +17,13 @@ Alternatively, you can download djangregator yourself from the github page (http
 
 Once it's visible to python, don't forget to add djangregator to your project's INSTALLED_APPS, and run manage.py syncdb to generate the tables which djangregator needs.
 
-Finally, you'll need to set up a recurring, automated task to trigger fetching of updates from each of the remote services. This requires calling djangregator.fetch() from a python instance which is aware of django and knows how to find your project's settings. How you implement this is ultimately up to you and your platform; the djangregator_cron_example.py script which comes with djangregator 
+Finally, you'll need to set up a recurring, automated task to trigger fetching of updates from each of the remote services. This requires calling djangregator.fetch() from a python instance which is aware of django and knows how to find your project's settings. How you implement this is ultimately up to you and your platform; you can use the supplied djangregator_fetch.py script to accomplish this task:
+
+    ``$ python djangregator_fetch.py --help`` provides usage and syntax.
+    
+    ``$ python djangregator_fetch.py`` -- will execute under the assumption that it resides in your project directory, that is to say in the directory containing your settings.py file. The default logging level is INFO, meaning that debug information is not displayed.
+    
+    ``$ python djangregator_fetch.py --loglevel=DEBUG --projectpath=/path/to/your/project`` -- will execute while outputting verbose/debug logging and using the project residing at the specified path.
 
 
 Configuration
@@ -35,6 +45,8 @@ The configuration information all sits in the Online Personas. Each persona cons
 When you first create an online persona, you'll be presented with one blank entry for each online service. Fill in the persona name at the top and the details for each service you wish to use. If there are services you don't wish to use, simply leave them blank.
 
 You can synchronize one persona with multiple accounts from the same online service (i.e. multiple twitter accounts), but the django admin interface doesn't make this straightforward. Once you've created a persona and entered details for the first account, click "save and continue editing" -- the admin interface will then generate the blank form fields necessary to configure the next account. Repeat the process as often as needed.
+
+Once you're done with configuration don't forget to run ``djangregator_fetch.py`` in order to fetch the data from all of the remote services you've specified.
 
 Service-specific configuration notes
 ------------------------------------
@@ -96,7 +108,7 @@ Frequently Asked Questions
     heart's content, it's easy with git.
 
 
-**Why isn't there a backend for *foo*?**
+**Why isn't there a backend for my favorite online service?**
     Because you haven't submitted a patch adding support for it yet.
 
 
