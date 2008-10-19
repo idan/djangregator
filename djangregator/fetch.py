@@ -26,33 +26,64 @@
 
 from djangregator.models import *
 import logging
-
-logging.basicConfig(level=logging.DEBUG)
+import sys
 
 def fetch():
-    logging.info("Commencing fetch.")
+    logger = logging.getLogger("Fetch")
+    success_total = 0
+    fail_total = 0
+    logger.info("Commencing fetch.")
     personas = OnlinePersona.objects.all()
     for persona in personas:
-        logging.info("Fetching accounts related to \"%s\"" % persona.name)
+        success_persona = 0
+        fail_persona = 0
+        logger.info("Fetching accounts related to \"%s\"" % persona.name)
         accounts = persona.accounts()
+        
+        if accounts.count == 0:
+            logger.info('Persona "%s" has no defined accounts. Skipping...' % persona.name)
+            continue
+        
         for account in accounts:
             if not account.active:
-                logging.info("Skipping inactive %s account \"%s\"" % (account.service, account))
+                logger.info("Skipping inactive %s account \"%s\"" % (account.service, account))
                 continue
             
-            logging.info("Fetching activity from %s account \"%s\"" % (account.service, account))
+            logger.info("Fetching activity from %s account \"%s\"" % (account.service, account))
             
             modulename = "djangregator.services.%s" % account.service
             try:
                 module = __import__(modulename, globals(), locals(), ['fetch'])
-            except:
-                logging.exception("Unable to load a backend for syncing with %s. Skipping..." % account.service)
+            except ImportError:
+                fail_persona += 1
+                fail_total += 1
+                logger.error("Unable to load a backend for fetching from %s. Skipping..." % account.service)
                 continue
             
             try:
                 (created, existing) = module.fetch(account)
-                logging.info('%s: synced %s new, %s existing' % (account.service, created, existing))
+                logger.info('%s: fetched %d new, skipped %d existing' % (account.service, created, existing))
             except:
-                logging.error('%s: sync failed' % account.service)
-                
-    logging.info("Fetch complete.")
+                fail_persona += 1
+                fail_total += 1
+                exc_type, exc_value = sys.exc_info()[:2]
+                logger.exception('Failed to fetch activity from %s account "%s": %s: "%s"' % 
+                (account.service,
+                account,
+                exc_type.__name__,
+                exc_value if exc_value else "no additional information"))
+            else:
+                success_persona += 1
+                success_total += 1
+        
+        persona_report = '--- Persona "%s" fetch report: %d OK, %d failures.'
+        if not fail_persona:
+            logger.info(persona_report % (persona.name, success_persona, fail_persona))
+        else:
+            logger.warn(persona_report % (persona.name, success_persona, fail_persona))
+    
+    if not fail_total:
+        logger.info('=== Fetch completed with no errors: %s personas / %d accounts.' % (personas.count, success_total))
+    else:
+        logger.warn('=== Fetch completed with some errors: %s personas / %d accounts OK / %d accounts failed' %
+        (personas.count(), success_total, fail_total))

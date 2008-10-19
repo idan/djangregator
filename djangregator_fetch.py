@@ -56,29 +56,37 @@ parser.add_option("-p", "--projectpath",
 
 (options, args) = parser.parse_args()
 
-logging.basicConfig(level=logging.getLevelName(options.loglevel))
+logging.basicConfig(
+    level=logging.getLevelName(options.loglevel),
+    format="%(asctime)s | %(levelname)8s: %(name)s | %(message)s")
+    
+logger = logging.getLogger("djangregator_fetch")
 
 selectedpath = os.path.realpath(os.path.normpath(options.projectpath))
 
 if not os.path.exists(selectedpath):
-    logging.fatal('The specified directory does not exist: "%s"' % selectedpath)
+    logger.critical('The specified directory does not exist: "%s"' % selectedpath)
 
-logging.info('Project Path: %s' % selectedpath)
+logger.info('Project Path: %s' % selectedpath)
 PATH_HEAD, PATH_TAIL = os.path.split(selectedpath)
-logging.debug('Project Path Head: %s' % PATH_HEAD)
-logging.debug('Project Path Tail: %s' % PATH_TAIL)
+logger.debug('Project Path Head: %s' % PATH_HEAD)
+logger.debug('Project Path Tail: %s' % PATH_TAIL)
 
 os.chdir(options.projectpath)
 
 sys.path.insert(0, selectedpath)
 sys.path.insert(1, PATH_HEAD)
 
-logging.debug('sys.path: %s' % sys.path)
+logger.debug('sys.path: %s' % sys.path)
 
 os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % PATH_TAIL
 
-logging.debug('os.environ[DJANGO_SETTINGS_MODULE]: %s' % os.environ['DJANGO_SETTINGS_MODULE'])
+logger.debug('os.environ[DJANGO_SETTINGS_MODULE]: %s' % os.environ['DJANGO_SETTINGS_MODULE'])
 
 # check that the project actually has djangregator installed and tables created?
-import djangregator
-djangregator.fetch()
+try:
+    import djangregator
+except ImportError:
+    logger.critical("Unable to import Djangregator, aborting.")
+else:
+    djangregator.fetch()
