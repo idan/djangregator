@@ -76,14 +76,14 @@ def fetch():
                 success_persona += 1
                 success_total += 1
         
-        persona_report = '--- Persona "%s" fetch report: %d OK, %d failures.'
+        persona_report = '--- Persona "%s" fetch report: %d OK, %d failed.'
         if not fail_persona:
             logger.info(persona_report % (persona.name, success_persona, fail_persona))
         else:
             logger.warn(persona_report % (persona.name, success_persona, fail_persona))
     
     if not fail_total:
-        logger.info('=== Fetch completed with no errors: %s personas / %d accounts.' % (personas.count, success_total))
+        logger.info('=== Fetch completed with no errors: %s personas / %d accounts.' % (personas.count(), success_total))
     else:
         logger.warn('=== Fetch completed with some errors: %s personas / %d accounts OK / %d accounts failed' %
         (personas.count(), success_total, fail_total))
