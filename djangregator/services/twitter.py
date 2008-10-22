@@ -46,18 +46,17 @@ def fetch(account):
     import twitterapi
     import rfc822
     import datetime
-    from django.core.exceptions import ObjectDoesNotExist
     items_existing = 0
     items_created = 0
     twitterapi = twitterapi.Api()
     
     # get the latest tweet we already have
-    try:
+    if TwitterStatus.objects.count() > 0:
         latest_id = TwitterStatus.objects.latest().twitter_id
         tweets = twitterapi.GetUserTimeline(
             user=account.username,
             since_id=latest_id)
-    except ObjectDoesNotExist:
+    else:
         tweets = twitterapi.GetUserTimeline(user=account.username)
         
     for status in tweets:
