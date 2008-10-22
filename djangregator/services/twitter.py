@@ -30,6 +30,9 @@
 
 from djangregator.models import TwitterStatus, TwitterAccount
 from datetime import datetime
+import logging
+
+logger = logging.getLogger("Twitter")
 
 def fetch(account):
     """

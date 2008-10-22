@@ -34,6 +34,8 @@ from dateutil import parser
 import calendar
 import logging
 
+logger = logging.getLogger("Flickr")
+
 def fetch(account):
     """
     Fetch a list of recent photos from the flickr servers using the supplied
@@ -55,12 +57,6 @@ def fetch(account):
             account.save()
         except:
             return (0, 0) # TODO: gperhaps a more useful exception handler?
-    # get the latest photo we already have
-    try:
-        latestphoto = FlickrPhoto.objects.latest()
-        timestamp = calendar.timegm(latestphoto.published.timetuple())
-    except:
-        latestdate = datetime.min
     
     extras = 'date_upload, date_taken'
     per_page = 500

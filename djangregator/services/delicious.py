@@ -29,6 +29,9 @@
 
 
 from djangregator.models import DeliciousLink, DeliciousAccount
+import logging
+
+logger = logging.getLogger("Delicious")
 
 def fetch(account):
     """
