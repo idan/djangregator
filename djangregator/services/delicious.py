@@ -42,18 +42,31 @@ def fetch(account):
     items updated or skipped.
     """
     
-    import deliciousapi
+    # python 2.6-safe import of json module:
+    try:
+        import simplejson as json
+    except ImportError:
+        try:
+            import json
+        except ImportError:
+            import django.utils.simplejson as json
+            
+    import urllib
+    import dateutil.parser
+    
     items_existing = 0
     items_created = 0
-    api = deliciousapi.DeliciousAPI()
-    for bookmark in api.get_bookmarks(username=account.username):
+    feedurl = "http://feeds.delicious.com/v2/json/%s" % account.username
+    bookmarks = json.load(urllib.urlopen(feedurl))
+    for bookmark in bookmarks:
+        timestamp = dateutil.parser.parse(bookmark['dt'])
         entry, created = DeliciousLink.objects.get_or_create(
             account = account,
-            link = bookmark[0],
-            published = bookmark[4])
+            link = bookmark['u'],
+            published = timestamp)
         if created:
-            entry.title = bookmark[2]
-            entry.description = bookmark[3]
+            entry.title = bookmark['d']
+            entry.description = bookmark['n']
             entry.save()
             items_created += 1
         else:
