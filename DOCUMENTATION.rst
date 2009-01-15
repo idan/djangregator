@@ -36,8 +36,8 @@ After adding djangregator to the INSTALLED_APPS and running a syncdb, fire up th
 **Djangregator**
  * Delicious Links
  * Flickr Photos
- * Lifestream Entries
  * Online Personas
+ * Timeline Entries
  * Twitter Statuses
 
 The configuration information all sits in the Online Personas. Each persona consists of a name and relevant identification details for one or more online services.
