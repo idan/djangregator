@@ -44,8 +44,6 @@ Sadly, there is no unified API for accessing different sites. The following libr
 
 * python-twitter - http://github.com/idangazit/python-twitter **(Note: this is a fork of the original python-twitter based at http://code.google.com/p/python-twitter/)
 * SimpleJson - http://cheeseshop.python.org/pypi/simplejson
-* DeliciousAPI - http://pypi.python.org/pypi/DeliciousAPI
-* BeautifulSoup - required for DeliciousAPI
 * FlickrAPI - http://flickrapi.sourceforge.net/
   
   
