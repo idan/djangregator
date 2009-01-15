@@ -225,21 +225,21 @@ class FlickrPhoto(AbstractActivityEntry):
 # Signals
 ##############################################################################
 
-def update_activityentry(sender, instance, created, raw, **kwargs):
+def update_timeline(sender, instance, created, raw, **kwargs):
     """
-    Post-save handler which creates or updates ActivityEntry instances
+    Post-save handler which creates or updates TimelineEntry instances
     whenever service-specific model instances are saved.
     """
     if created:
-        item = ActivityEntry()
+        item = TimelineEntry()
         item.content_type = ContentType.objects.get_for_model(type(instance))
         item.object_id = instance.id
     else:
-        item = instance.activityentry.all()[0]
+        item = instance.timelineentry.all()[0]
     item.published = instance.published
     item.save()
 
 
 for source in [TwitterStatus, DeliciousLink, FlickrPhoto,]:
-    signals.post_save.connect(update_activityentry, source,
+    signals.post_save.connect(update_timeline, source,
         dispatch_uid='djangregator.models')
