@@ -38,9 +38,9 @@ import datetime
 # Common/Abstract Djangregator Models
 ##############################################################################
 
-class LifestreamEntry(models.Model):
+class TimelineEntry(models.Model):
     """
-    Generically related to an activity entry from any online service.
+    Generically related to an entry from any online service.
     """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -50,8 +50,8 @@ class LifestreamEntry(models.Model):
     class Meta:
         ordering = ['-published']
         get_latest_by = 'published'
-        verbose_name = 'Lifestream Entry'
-        verbose_name_plural = 'Lifestream Entries'
+        verbose_name = 'Timeline Entry'
+        verbose_name_plural = 'Timeline Entries'
 
 
 class OnlinePersona(models.Model):
@@ -86,7 +86,7 @@ class AbstractActivityEntry(models.Model):
     published = models.DateTimeField(null=False, blank=False)
     title = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    lifestream_entry = generic.GenericRelation(LifestreamEntry)
+    timelineentry = generic.GenericRelation(TimelineEntry)
     
     class Meta:
         ordering = ['-published']
@@ -111,21 +111,10 @@ class AbstractServiceAccount(models.Model):
     
     def __unicode__(self):
         return self.username
+        
+    def service(self):
+        return self.servicename or u'unknown service'
 
-
-def update_lifestream_entry(sender, instance, created, raw, **kwargs):
-    """
-    Post-save handler which creates or updates LifestreamEntry instances
-    whenever service-specific model instances are saved.
-    """
-    if created:
-        item = LifestreamEntry()
-        item.content_type = ContentType.objects.get_for_model(type(instance))
-        item.object_id = instance.id
-    else:
-        item = instance.lifestream_entry.all()[0]
-    item.published = instance.published
-    item.save()
 
 
 ##############################################################################
@@ -156,10 +145,8 @@ class TwitterStatus(AbstractActivityEntry):
     class Meta(AbstractActivityEntry.Meta):
         verbose_name = 'Twitter Status'
         verbose_name_plural = 'Twitter Statuses'    
-
-
-signals.post_save.connect(update_lifestream_entry, TwitterStatus, dispatch_uid='djangregator.models')
-
+    
+    servicename = u'twitter'
 
 ##############################################################################
 # Delicious
@@ -190,10 +177,8 @@ class DeliciousLink(AbstractActivityEntry):
         verbose_name = 'Delicious Link'
         verbose_name_plural = 'Delicious Links'
     
-    service = u'delicious'
+    servicename = u'delicious'
 
-
-signals.post_save.connect(update_lifestream_entry, DeliciousLink, dispatch_uid='djangregator.models')
 
 
 ##############################################################################
@@ -233,7 +218,28 @@ class FlickrPhoto(AbstractActivityEntry):
     class Meta(AbstractActivityEntry.Meta):
         verbose_name = 'Flickr Photo'
         verbose_name_plural = 'Flickr Photos'
+    
+    servicename = u'flickr'
+
+##############################################################################
+# Signals
+##############################################################################
+
+def update_activityentry(sender, instance, created, raw, **kwargs):
+    """
+    Post-save handler which creates or updates ActivityEntry instances
+    whenever service-specific model instances are saved.
+    """
+    if created:
+        item = ActivityEntry()
+        item.content_type = ContentType.objects.get_for_model(type(instance))
+        item.object_id = instance.id
+    else:
+        item = instance.activityentry.all()[0]
+    item.published = instance.published
+    item.save()
 
 
-signals.post_save.connect(update_lifestream_entry, FlickrPhoto, dispatch_uid='djangregator.models')
-
+for source in [TwitterStatus, DeliciousLink, FlickrPhoto,]:
+    signals.post_save.connect(update_activityentry, source,
+        dispatch_uid='djangregator.models')

@@ -32,7 +32,7 @@ from django.contrib import admin
 from django.contrib.contenttypes import generic
 from djangregator.models import *
 
-class LifestreamEntryAdmin(admin.ModelAdmin):
+class TimelineEntryAdmin(admin.ModelAdmin):
     list_display = ('published', 'content_type')
     date_hierarchy = 'published'
     list_filter = ('content_type',)
@@ -59,7 +59,7 @@ class OnlinePersonaAdmin(admin.ModelAdmin):
         FlickrAccountAdmin
     )
 
-admin.site.register(LifestreamEntry, LifestreamEntryAdmin)
+admin.site.register(TimelineEntry, TimelineEntryAdmin)
 admin.site.register(OnlinePersona, OnlinePersonaAdmin)
 
 # Service-specific models
