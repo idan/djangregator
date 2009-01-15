@@ -39,4 +39,6 @@ setup(
     author_email = "idan@pixane.net",
     description = "A django application for aggregating your activities from various social networking sites.",
     url = "http://github.com/idangazit/djangregator/",
+    license = "BSD",
+    scripts = ["djangregator_fetch.py",],
     include_package_data = True )
