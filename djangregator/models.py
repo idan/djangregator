@@ -32,7 +32,7 @@ from django.db import models
 from django.db.models import signals
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-import datetime
+from datetime import datetime
 
 ##############################################################################
 # Common/Abstract Djangregator Models
@@ -52,6 +52,9 @@ class TimelineEntry(models.Model):
         get_latest_by = 'published'
         verbose_name = 'Timeline Entry'
         verbose_name_plural = 'Timeline Entries'
+    
+    def __unicode__(self):
+        return self.content_object.__str__()
 
 
 class OnlinePersona(models.Model):
@@ -213,7 +216,7 @@ class FlickrPhoto(AbstractActivityEntry):
     photo_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
     square_thumb_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     image_500px_link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
-    taken_on_date = models.DateTimeField(blank=True, default=datetime.datetime.now)
+    taken_on_date = models.DateTimeField(blank=True, default=datetime.now)
     
     class Meta(AbstractActivityEntry.Meta):
         verbose_name = 'Flickr Photo'
