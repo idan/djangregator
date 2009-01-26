@@ -32,6 +32,9 @@ from django.db import models
 from django.db.models import signals
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.manager import EmptyManager
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 from datetime import datetime
 
 ##############################################################################
@@ -55,6 +58,14 @@ class TimelineEntry(models.Model):
     
     def __unicode__(self):
         return self.content_object.__str__()
+    
+    def get_rendered_html(self):
+       return self.content_object.get_rendered_html()
+       #try:
+       #    return self.content_object.get_rendered_html()
+       #except AttributeError:
+       #    pass
+       #    #return mark_safe("<p>%s</p>" % self.content_object.__str__())
 
 
 class OnlinePersona(models.Model):
@@ -79,7 +90,32 @@ class OnlinePersona(models.Model):
                 accounts.append(account)
         return accounts
             
-
+class ActivityEntryBatch(models.Model):
+    """
+    A batch of several related activity entries. Intended for associating
+    multiple related items which are usually displayed together, for example
+    a batch of photos which were uploaded together.
+    """
+    published = models.DateTimeField()
+    content_type = models.ForeignKey(ContentType)
+    
+    class Meta:
+        ordering = ['-published']
+        get_latest_by = 'published'
+    
+    def __unicode__(self):
+        if self.content_type:
+            return "%s batch of %i" % (self.content_type.name, self.entries.count())
+        else:
+            return "Unknown batch"
+    
+    def get_entries(self):
+        if not self.content_type:
+            return EmptyManager()
+        else:
+            return getattr(self, self.content_type.model + "_entries")
+    
+    entries = property(get_entries)
 
 class AbstractActivityEntry(models.Model):
     """
@@ -90,6 +126,7 @@ class AbstractActivityEntry(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     timelineentry = generic.GenericRelation(TimelineEntry)
+    batch = models.ForeignKey(ActivityEntryBatch, null=True, related_name="%(class)s_entries")
     
     class Meta:
         ordering = ['-published']
@@ -98,6 +135,13 @@ class AbstractActivityEntry(models.Model):
         
     def __unicode__(self):
         return self.title or self.link
+    
+    def get_rendered_html(self):
+        return mark_safe("<p>%s</p>" % self.__str__())
+
+
+
+
 
 
 class AbstractServiceAccount(models.Model):
@@ -181,7 +225,10 @@ class DeliciousLink(AbstractActivityEntry):
         verbose_name_plural = 'Delicious Links'
     
     servicename = u'delicious'
-
+    
+    def get_rendered_html(self):
+        template_name = 'djangregator/timeline/deliciouslink.html'
+        return render_to_string(template_name, {'entry': self})
 
 
 ##############################################################################
