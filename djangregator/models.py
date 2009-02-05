@@ -139,7 +139,7 @@ class Activity(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     timelineentry = models.ForeignKey(TimelineEntry, null=True, related_name="activities")
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, null=True)
     
     class Meta:
         ordering = ['-published']
@@ -152,10 +152,10 @@ class Activity(models.Model):
         return mark_safe("<p>%s</p>" % self.__str__())
     
     def get_batch(self):
-        # find the batch where:
-        # the content_type matches this object's content_type
-        # the span_start is gte the publication date - window
-        # the span_end is lte the publication date + window
+        """
+        Finds the appropriate batch for this activity.
+        Raises Activity.DoesNotExist if no suitable batch found.
+        """
         content_type = ContentType.objects.get_for_model(type(self))
         window = timedelta(minutes=self.account.batch_minutes)
         earliest = self.published - window
@@ -194,6 +194,7 @@ class TwitterStatus(Activity):
     class Meta:
         verbose_name = 'Twitter Status'
         verbose_name_plural = 'Twitter Statuses'
+
 
 ##############################################################################
 # Delicious
@@ -274,10 +275,9 @@ def activity_pre_save(sender, instance, **kwargs):
     whenever service-specific activity instances are saved.
     """
     
-    batching = instance.account.batching
     content_type = ContentType.objects.get_for_model(type(instance))
             
-    if batching:
+    if instance.account and instance.account.batching:
         try:
             tle = instance.get_batch()
         except instance.DoesNotExist:
@@ -305,7 +305,6 @@ def activity_pre_save(sender, instance, **kwargs):
 
 def activity_post_save(sender, instance, created, raw, **kwargs):
     instance.timelineentry.update_span()
-
 
 for source in [TwitterStatus, DeliciousLink, FlickrPhoto,]:
     signals.pre_save.connect(activity_pre_save, source,
