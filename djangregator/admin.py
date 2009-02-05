@@ -33,11 +33,11 @@ from django.contrib.contenttypes import generic
 from djangregator.models import *
 
 class TimelineEntryAdmin(admin.ModelAdmin):
-    list_display = ('published', 'content_type')
-    date_hierarchy = 'published'
+    list_display = ('published_first', 'content_type')
+    date_hierarchy = 'published_first'
     list_filter = ('content_type',)
     
-class ActivityEntryAdmin(admin.ModelAdmin):
+class ActivityAdmin(admin.ModelAdmin):
     date_hierarchy = 'published'
 
 class GenericServiceAccountAdmin(admin.StackedInline):
@@ -63,6 +63,5 @@ admin.site.register(TimelineEntry, TimelineEntryAdmin)
 admin.site.register(OnlinePersona, OnlinePersonaAdmin)
 
 # Service-specific models
-admin.site.register(TwitterStatus, ActivityEntryAdmin)
-admin.site.register(DeliciousLink, ActivityEntryAdmin)
-admin.site.register(FlickrPhoto, ActivityEntryAdmin)
+for m in [TwitterStatus, DeliciousLink, FlickrPhoto]:
+    admin.site.register(m, ActivityAdmin)

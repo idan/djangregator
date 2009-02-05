@@ -37,7 +37,7 @@ def fetch():
     success_total = 0
     fail_total = 0
     logger.info("Commencing fetch.")
-    personas = OnlinePersona.objects.all()
+    personas = Persona.objects.all()
     for persona in personas:
         success_persona = 0
         fail_persona = 0
