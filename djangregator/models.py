@@ -35,6 +35,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.manager import EmptyManager
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
 import logging
 
@@ -55,13 +56,14 @@ class TimelineEntry(models.Model):
     class Meta:
         ordering = ['-span_start']
         get_latest_by = 'span_start'
-        verbose_name = 'Timeline Entry'
-        verbose_name_plural = 'Timeline Entries'
+        verbose_name = _(u'Timeline Entry')
+        verbose_name_plural = _(u'Timeline Entries')
     
     def __unicode__(self):
         if self.content_type:
             count = self.activities.count()
             m = self.content_type._meta
+            # TODO i18n
             base = u"%(count)i %(name)s" % ({
                 'count' : count,
                 'name' : m.verbose_name if count == 1 else m.verbose_name_plural   
@@ -87,7 +89,7 @@ class TimelineEntry(models.Model):
             latest = self.activities.latest().published
             earliest = self.activities.order_by('published').get().published
         except Activity.DoesNotExist:
-            logger.error("Timeline Entry has must have related activities in order to set the span.")
+            logger.error(_("Timeline Entry has must have related activities in order to set the span."))
             return
         self.span_start = earliest
         self.span_end = latest
@@ -101,8 +103,8 @@ class Persona(models.Model):
     
     class Meta:
         ordering = ['name',]
-        verbose_name = "Online Persona"
-        verbose_name_plural = "Online Personas"
+        verbose_name = _(u"Online Persona")
+        verbose_name_plural = _(u"Online Personas")
     
     def __unicode__(self):
         return self.name
@@ -114,15 +116,18 @@ class Account(models.Model):
     to fetch information from an online service.
     """
     username = models.CharField(blank=False, max_length=100)
-    active = models.BooleanField(default=True, help_text="Uncheck to disable synchronization with this account")
-    batching = models.BooleanField(default=False, help_text="Check to batch nearby entries together in the timeline")
-    batch_minutes = models.PositiveIntegerField(default=15, help_text="The window of time (in minutes) over which to batch events together in the timeline. If an entry is less than this number of minutes apart from an existing batch, it will be included in that batch.")
+    active = models.BooleanField(default=True,
+        help_text=_("Uncheck to disable synchronization with this account"))
+    batching = models.BooleanField(default=False,
+        help_text=_("Check to batch nearby entries together in the timeline"))
+    batch_minutes = models.PositiveIntegerField(default=15,
+        help_text=_("The window of time (in minutes) over which to batch events together in the timeline. If an entry is less than this number of minutes apart from an existing batch, it will be included in that batch."))
     persona = models.ForeignKey(Persona, related_name="accounts")
     
     def __unicode__(self):
         return self.username
     
-    servicename = u'unknown service'
+    servicename = _(u'unknown service')
     
     def get_service(self):
         return self.servicename
@@ -179,10 +184,10 @@ class TwitterAccount(Account):
     """
     
     class Meta:
-        verbose_name = "Twitter Account"
-        verbose_name_plural = "Twitter Accounts"
+        verbose_name = _(u"Twitter Account")
+        verbose_name_plural = _(u"Twitter Accounts")
     
-    servicename = u'twitter'
+    servicename = _(u'twitter')
 
 
 class TwitterStatus(Activity):
@@ -192,8 +197,8 @@ class TwitterStatus(Activity):
     twitter_id = models.PositiveIntegerField(blank=False, null=False, unique=True)
     
     class Meta:
-        verbose_name = 'Twitter Status'
-        verbose_name_plural = 'Twitter Statuses'
+        verbose_name = _(u'Twitter Status')
+        verbose_name_plural = _(u'Twitter Statuses')
 
 
 ##############################################################################
@@ -207,10 +212,10 @@ class DeliciousAccount(Account):
     """
     
     class Meta:
-        verbose_name = "Delicious Account"
-        verbose_name_plural = "Delicious Accounts"
+        verbose_name = _(u"Delicious Account")
+        verbose_name_plural = _(u"Delicious Accounts")
     
-    servicename = u'delicious'
+    servicename = _(u'delicious')
 
 
 class DeliciousLink(Activity):
@@ -220,8 +225,8 @@ class DeliciousLink(Activity):
     description = models.TextField(blank=True)
     
     class Meta:
-        verbose_name = 'Delicious Link'
-        verbose_name_plural = 'Delicious Links'
+        verbose_name = _(u'Delicious Link')
+        verbose_name_plural = _(u'Delicious Links')
         
     def get_rendered_html(self):
         template_name = 'djangregator/timeline/deliciouslink.html'
@@ -242,10 +247,10 @@ class FlickrAccount(Account):
     api_secret = models.CharField(blank=True, max_length=20) # max 16?
     
     class Meta:
-        verbose_name = "Flickr Account"
-        verbose_name_plural = "Flickr Accounts"
+        verbose_name = _(u"Flickr Account")
+        verbose_name_plural = _(u"Flickr Accounts")
     
-    servicename = u'flickr'
+    servicename = _(u'flickr')
     
     def __unicode__(self):
         return self.username or self.userid
@@ -261,8 +266,8 @@ class FlickrPhoto(Activity):
     taken_on_date = models.DateTimeField(blank=True, default=datetime.now)
     
     class Meta:
-        verbose_name = 'Flickr Photo'
-        verbose_name_plural = 'Flickr Photos'
+        verbose_name = _(u'Flickr Photo')
+        verbose_name_plural = _(u'Flickr Photos')
 
 
 ##############################################################################
@@ -284,6 +289,7 @@ def activity_pre_save(sender, instance, **kwargs):
             tle = TimelineEntry()
             tle.content_type = content_type
         except instance.MultipleObjectsReturned:
+            # TODO i18n
             logger.error("Found multiple TimelineEntries for %(name)s at %(date)s" % ({
                 'name' : content_type.name,
                 'date' : instance.published.strftime('%Y-%m-%d %H:%M:%S'),
