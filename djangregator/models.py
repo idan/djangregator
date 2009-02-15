@@ -140,7 +140,7 @@ class Activity(models.Model):
     An ancestor class which encapsulates the common information which
     describes an activity from an online service.
     """
-    published = models.DateTimeField(null=False, blank=False)
+    published = models.DateTimeField(null=False, blank=False, default=datetime.now)
     title = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField(max_length=255, verify_exists=False, null=True, blank=True)
     timelineentry = models.ForeignKey(TimelineEntry, null=True, related_name="activities")
