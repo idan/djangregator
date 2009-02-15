@@ -42,7 +42,7 @@ def fetch():
         success_persona = 0
         fail_persona = 0
         logger.info("Fetching accounts related to \"%s\"" % persona.name)
-        accounts = persona.accounts()
+        accounts = persona.accounts.all()
         
         if accounts.count == 0:
             logger.info('Persona "%s" has no defined accounts. Skipping...' % persona.name)
