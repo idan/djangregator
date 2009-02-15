@@ -33,35 +33,42 @@ from django.contrib.contenttypes import generic
 from djangregator.models import *
 
 class TimelineEntryAdmin(admin.ModelAdmin):
-    list_display = ('published_first', 'content_type')
-    date_hierarchy = 'published_first'
+    list_display = ('id', 'content_type', 'span_start', 'span_end')
+    list_display_links = ('id', )
+    date_hierarchy = 'span_start'
     list_filter = ('content_type',)
     
 class ActivityAdmin(admin.ModelAdmin):
     date_hierarchy = 'published'
 
-class GenericServiceAccountAdmin(admin.StackedInline):
+#class AccountAdmin(admin.StackedInline):
+#    extra = 1
+
+class TwitterAccountAdmin(admin.StackedInline):
+    model = TwitterAccount
     extra = 1
 
-class TwitterAccountAdmin(GenericServiceAccountAdmin):
-    model = TwitterAccount
-
-class DeliciousAccountAdmin(GenericServiceAccountAdmin):
+class DeliciousAccountAdmin(admin.StackedInline):
     model = DeliciousAccount
-
-class FlickrAccountAdmin(GenericServiceAccountAdmin):
+    extra = 1
+    
+class FlickrAccountAdmin(admin.StackedInline):
     model = FlickrAccount
-
-class OnlinePersonaAdmin(admin.ModelAdmin):
+    extra = 1
+    
+class PersonaAdmin(admin.ModelAdmin):
     inlines = (
         TwitterAccountAdmin,
         DeliciousAccountAdmin,
-        FlickrAccountAdmin
+        #FlickrAccountAdmin
     )
 
 admin.site.register(TimelineEntry, TimelineEntryAdmin)
-admin.site.register(OnlinePersona, OnlinePersonaAdmin)
+admin.site.register(Persona, PersonaAdmin)
 
+for m in [TwitterAccount, DeliciousAccount, FlickrAccount]:
+    admin.site.register(m, admin.ModelAdmin)
+    
 # Service-specific models
 for m in [TwitterStatus, DeliciousLink, FlickrPhoto]:
     admin.site.register(m, ActivityAdmin)
