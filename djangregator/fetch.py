@@ -48,7 +48,8 @@ def fetch():
             logger.info('Persona "%s" has no defined accounts. Skipping...' % persona.name)
             continue
         
-        for account in accounts:
+        for account in [account.child for account in accounts]:
+            
             if not account.active:
                 logger.info("Skipping inactive %s account \"%s\"" % (account.service, account))
                 continue

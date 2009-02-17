@@ -41,33 +41,34 @@ class TimelineEntryAdmin(admin.ModelAdmin):
 class ActivityAdmin(admin.ModelAdmin):
     date_hierarchy = 'published'
 
-#class AccountAdmin(admin.StackedInline):
-#    extra = 1
+class AccountAdmin(admin.StackedInline):
+    extra = 1
+    exclude = ("child_type",)
+    #model = Account
 
-class TwitterAccountAdmin(admin.StackedInline):
+class TwitterAccountAdmin(AccountAdmin):
     model = TwitterAccount
-    extra = 1
 
-class DeliciousAccountAdmin(admin.StackedInline):
+class DeliciousAccountAdmin(AccountAdmin):
     model = DeliciousAccount
-    extra = 1
     
-class FlickrAccountAdmin(admin.StackedInline):
+class FlickrAccountAdmin(AccountAdmin):
     model = FlickrAccount
-    extra = 1
     
 class PersonaAdmin(admin.ModelAdmin):
     inlines = (
         TwitterAccountAdmin,
         DeliciousAccountAdmin,
-        #FlickrAccountAdmin
+        FlickrAccountAdmin,
     )
 
 admin.site.register(TimelineEntry, TimelineEntryAdmin)
 admin.site.register(Persona, PersonaAdmin)
 
-for m in [TwitterAccount, DeliciousAccount, FlickrAccount]:
-    admin.site.register(m, admin.ModelAdmin)
+# Uncomment if using SVN <= 9834 because inline formsets are broken for
+# multiple inherited models, see #10271 for fix.
+#for m in [TwitterAccount, DeliciousAccount, FlickrAccount]:
+#    admin.site.register(m, admin.ModelAdmin)
     
 # Service-specific models
 for m in [TwitterStatus, DeliciousLink, FlickrPhoto]:

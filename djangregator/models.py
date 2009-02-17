@@ -30,7 +30,6 @@
 
 from django.db import models
 from django.db.models import signals
-from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.manager import EmptyManager
 from django.template.loader import render_to_string
@@ -123,16 +122,29 @@ class Account(models.Model):
     batch_minutes = models.PositiveIntegerField(default=15,
         help_text=_("The window of time (in minutes) over which to batch events together in the timeline. If an entry is less than this number of minutes apart from an existing batch, it will be included in that batch."))
     persona = models.ForeignKey(Persona, related_name="accounts")
-    
+    child_type = models.ForeignKey(ContentType)
+    servicename = u'unknown service'
+        
     def __unicode__(self):
         return self.username
     
-    servicename = _(u'unknown service')
+    def save(self, **kwargs):
+        self.child_type = ContentType.objects.get_for_model(type(self))
+        super(Account, self).save(**kwargs)
+    
+    def get_child(self):
+        """
+        Gets related account child instance (e.g. "downcasts")
+        """
+        return getattr(self, self.child_type.model)    
+    
+    child = property(get_child)
     
     def get_service(self):
         return self.servicename
     
     service = property(get_service)
+
 
 
 class Activity(models.Model):
@@ -187,7 +199,7 @@ class TwitterAccount(Account):
         verbose_name = _(u"Twitter Account")
         verbose_name_plural = _(u"Twitter Accounts")
     
-    servicename = _(u'twitter')
+    servicename = u'twitter'
 
 
 class TwitterStatus(Activity):
@@ -215,7 +227,7 @@ class DeliciousAccount(Account):
         verbose_name = _(u"Delicious Account")
         verbose_name_plural = _(u"Delicious Accounts")
     
-    servicename = _(u'delicious')
+    servicename = u'delicious'
 
 
 class DeliciousLink(Activity):
@@ -250,7 +262,7 @@ class FlickrAccount(Account):
         verbose_name = _(u"Flickr Account")
         verbose_name_plural = _(u"Flickr Accounts")
     
-    servicename = _(u'flickr')
+    servicename = u'flickr'
     
     def __unicode__(self):
         return self.username or self.userid
